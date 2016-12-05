@@ -126,7 +126,8 @@ void restart(){
   ballY = height/5;
   lastAddTime= 0;
   walls.clear();
-  gameScreen =0;}
+  gameScreen =0;
+  }
   
 void applyGravity(){
     ballSpeedVert +=gravity;
