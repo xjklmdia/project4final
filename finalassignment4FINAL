@@ -289,7 +289,7 @@ void watchWallCollision(int index){
   }
   
 //citation:  https://www.openprocessing.org/sketch/120612
-//health bar to drain altered to on hit
+//health bar to drain altered to on hit upon watch wall collision
 void drawHealthBar(){ 
   noStroke();
   fill(250,240,230);
@@ -307,7 +307,6 @@ void drawHealthBar(){
    rectMode(CORNER);
    rect(ballX-(healthBarW/2), ballY-30, healthBarW*(health/maxHealth),5);
   }
-  
 void decreaseHealth(){
     health -= healthDecrease;
     if(health <=0){
