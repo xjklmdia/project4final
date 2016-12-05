@@ -1,0 +1,317 @@
+//control variables
+//0:initial variable
+//1:game screen
+//2:game over screen
+  PFont Font1;
+  PFont Font2;
+  PImage ballimg;
+
+  int gameScreen =0;
+//ball
+  float ballX, ballY;
+  int ballSize =50;
+//racket
+  int racketColor = color(255,0,0);
+  int racketimpact =20;
+  float racketWidth =100;
+  float racketHeight = 10;
+  float lastAddTime =0;
+//healthbar
+  int maxHealth = 100;
+  int healthBarW=60;
+  float health = 100;
+  float healthDecrease = 1;
+//gravity
+  float gravity =.6;
+  float ballSpeedVert =0;
+  float ballHspeed =0;
+//friction
+  float ACOF = 0.0001;
+  float KOF = 0.1;
+//wall
+  int wallSpeed = 2;
+  int wallInt =2000;
+  int minGH=100;
+  int maxGH=400;
+  int wallWidth=60;
+  int wallColor = color(59,224,212);
+
+ArrayList<int[]>walls = new ArrayList<int[]>();
+//
+void setup(){
+    size(500,500);
+    smooth();
+    ballX=width/4;
+    ballY=height/5;
+    //ballimg = loadImage("kwest.jpg");
+    Font1 = loadFont("BodoniMTBlack-32.vlw");
+    Font2 = loadFont("BradleyHandITC-32.vlw");
+    noStroke();
+    noCursor();
+  }
+//
+void draw(){
+    if(gameScreen==0){
+      initScreen();
+  } else if(gameScreen==1){
+      gameScreen();
+  } else if (gameScreen==2){
+      gameOverScreen();
+    }
+  }
+//screen content
+void initScreen(){
+// initial
+    background(0);
+    textAlign(CENTER);
+    textFont(Font1,32);
+    text("click to start", width/2, height/2);
+    text("*you're probably going to lose",width/2,height-50);
+  }
+
+void gameScreen(){
+// gamescreen
+    background(250,197,111);
+    //textMode(CENTER);
+    //text("dont let him into his zone",250,250);
+    //text("dont let him into his zone",250,250-50);
+    //text("dont let him into his zone",250,250-100);
+    //text("dont let him into his zone",250,250-150);
+    drawBall();
+    watchRacket();
+    drawRacket();
+    applyGravity();
+    applyHSpeed();
+    wallAdder();
+    wallHandler();
+    drawHealthBar();
+    keepInScreen();
+  }
+  
+void gameOverScreen(){
+  //game over
+  background(0);
+  //cursor();
+  textAlign(CENTER);
+  textFont(Font2,32);
+  text("you have lost the game!!", height/2, width/2-20);
+  textFont(Font1,32);
+  text("click to restart", height/2, width/2 +10);
+  }
+//
+
+//input
+public void mousePressed(){
+    if(gameScreen==0){
+    startGame();
+    }
+    if(gameScreen==2){
+     restart();
+    }  
+  }
+//
+
+//functions
+void startGame(){
+    gameScreen=1;
+  }
+  
+void gameOver(){
+    gameScreen=2;
+  }
+
+void restart(){
+  health = maxHealth;
+  ballX = width/4;
+  ballY = height/5;
+  lastAddTime= 0;
+  walls.clear();
+  gameScreen =0;}
+  
+void applyGravity(){
+    ballSpeedVert +=gravity;
+    ballY+= ballSpeedVert;
+    ballSpeedVert -=(ballSpeedVert *ACOF);
+  }
+
+void applyHSpeed(){
+    ballX+= ballHspeed;
+    ballHspeed -=(ballHspeed *ACOF);
+  }
+
+void makeBounceBottom(float surface){
+    ballY = surface - (ballSize/2);
+    ballSpeedVert *= -1;
+  ballSpeedVert -=(ballSpeedVert *KOF);
+  }
+
+void makeBounceLeft(float surface){
+    ballX = surface + (ballSize/2);
+    ballHspeed *=-1;
+    ballHspeed -= (ballHspeed *KOF);
+  }
+
+void makeBounceRight(float surface){
+    ballX = surface - (ballSize/2);
+    ballHspeed *=-1;
+    ballHspeed -= (ballHspeed *KOF);
+  }
+
+void makeBounceTop(float surface){
+   ballY = surface + (ballSize/2);
+   ballSpeedVert *= -1;
+   ballSpeedVert -=(ballSpeedVert *KOF);
+  }
+
+void keepInScreen(){
+    //ball hits floor
+   if(ballY+(ballSize/2)>height){
+     makeBounceBottom(height);
+    }
+//ball hits ceiling
+  if(ballY-(ballSize/2)<0){
+    makeBounceTop(0);
+    }
+//ball hits Left
+  if(ballX-(ballSize/2)<0){
+    makeBounceLeft(0);
+    }
+//ball hits right
+  if(ballX-(ballSize/2)> width){
+    makeBounceRight(width);
+    }
+  }
+//kanyeball
+  void drawBall(){
+    //fill(ballColor);
+    ballimg = loadImage("kwest.png");
+    imageMode(CENTER);
+    image(ballimg,ballX,ballY,ballSize,ballSize);
+    //ellipse(ballX,ballY,ballSize,ballSize);
+  }
+
+void drawRacket(){
+    fill(racketColor);
+    rectMode(CENTER);
+    rect(mouseX,mouseY,racketWidth,racketHeight);
+  }
+
+void watchRacket(){
+ float overhead = mouseY-pmouseY;
+   if((ballX+(ballSize/2)> mouseX-(racketWidth/2)) && (ballX-(ballSize/2) < mouseX+(racketWidth/2))){
+     if(dist(ballX,ballY, ballX,mouseY)<=(ballSize/2)+abs(overhead)){
+       makeBounceBottom(mouseY);
+         if(overhead<0);{
+           ballY+=overhead;
+           ballHspeed = (ballX - mouseX)/5;
+           ballSpeedVert+=overhead;
+     }
+    }
+   }
+  }
+
+void wallAdder(){
+    if(millis()-lastAddTime > wallInt){
+      int randHeight = round(random(minGH, maxGH));
+      int randY = round(random(0,height-randHeight));
+      int[] randWall = {width,randY,wallWidth,randHeight,0};
+      walls.add(randWall);
+      lastAddTime=millis();
+   }
+  }
+
+void wallHandler(){
+    for(int i =0; i< walls.size(); i++){
+      wallRemover(i);
+      wallMover(i);
+      wallDrawer(i);
+      watchWallCollision(i);
+    }
+  }
+
+void wallDrawer(int index){
+    int[] wall= walls.get(index);
+      int gapWallX = wall[0];
+      int gapWallY = wall[1];
+      int gapWallW = wall[2];
+      int gapWallH = wall[3];
+  
+    rectMode(CORNER);
+    fill(wallColor);
+    rect(gapWallX, 0 ,gapWallW, gapWallY);
+    rect(gapWallX, gapWallY+ gapWallH, gapWallW,height -(gapWallY+ gapWallH));
+  }
+
+void wallMover( int index){
+    int[] wall = walls.get(index);
+    wall[0] -= wallSpeed;
+  }
+
+void wallRemover(int index){
+    int[] wall = walls.get(index);
+    if(wall[0] +wall[2] <= 0){
+    walls.remove(index);
+    }
+  }
+  
+void watchWallCollision(int index){
+    int[] wall = walls.get(index);
+    int gapWallX = wall[0];
+    int gapWallY = wall[1];
+    int gapWallW = wall[2];
+    int gapWallH = wall[3];
+    
+    int wallTopX = gapWallX;
+    int wallTopY = 0;
+    int wallTopW = gapWallW;
+    int wallTopH = gapWallY;
+    int wallBottomX = gapWallX;
+    int wallBottomY = gapWallY + gapWallH;
+    int wallBottomW = gapWallW;
+    int wallBottomH = height-(gapWallY+gapWallH);
+  
+    if(
+    (ballX+(ballSize/2)>wallTopX) &&
+    (ballX-(ballSize/2)<wallTopX+wallTopW) &&
+    (ballY+(ballSize/2)>wallTopY) &&
+    (ballY-(ballSize/2)<wallTopY+wallTopH)
+    ) {
+      decreaseHealth();
+    }
+    if(
+    (ballX+(ballSize/2)>wallBottomX) &&
+    (ballX-(ballSize/2)<wallBottomX+wallBottomW) &&
+    (ballY+(ballSize/2)>wallBottomY) &&
+    (ballY-(ballSize/2)<wallBottomY+wallBottomH)
+    ) {
+     decreaseHealth();
+    }
+  }
+  
+//citation:  https://www.openprocessing.org/sketch/120612
+//health bar to drain altered to on hit
+void drawHealthBar(){ 
+  noStroke();
+  fill(250,240,230);
+  //bar initial
+  rectMode(CORNER);
+  rect(ballX-(healthBarW/2), ballY-30,healthBarW, 5);
+  if (health>60){
+    fill(50,200,110);
+  }else if (health > 30){
+    fill(230,120,30);
+  }else {
+    fill(231,75,60);
+    }
+    //secondary bar dynamic
+   rectMode(CORNER);
+   rect(ballX-(healthBarW/2), ballY-30, healthBarW*(health/maxHealth),5);
+  }
+  
+void decreaseHealth(){
+    health -= healthDecrease;
+    if(health <=0){
+     gameOver();
+   }
+  }
+//
