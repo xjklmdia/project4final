@@ -82,7 +82,7 @@ void gameScreen(){
     drawRacket();
     applyGravity();
     applyHSpeed();
-    wallAdder();
+    wallAdd();
     wallHandler();
     drawHealthBar();
     keepInScreen();
@@ -126,8 +126,7 @@ void restart(){
   ballY = height/5;
   lastAddTime= 0;
   walls.clear();
-  gameScreen =0;
-  }
+  gameScreen =0;}
   
 void applyGravity(){
     ballSpeedVert +=gravity;
@@ -198,9 +197,9 @@ void drawRacket(){
   }
 
 void watchRacket(){
- float overhead = mouseY-pmouseY;
-   if((ballX+(ballSize/2)> mouseX-(racketWidth/2)) && (ballX-(ballSize/2) < mouseX+(racketWidth/2))){
-     if(dist(ballX,ballY, ballX,mouseY)<=(ballSize/2)+abs(overhead)){
+       float overhead = mouseY-pmouseY;
+       if((ballX+(ballSize/2)> mouseX-(racketWidth/2)) && (ballX-(ballSize/2) < mouseX+(racketWidth/2))){
+       if(dist(ballX,ballY, ballX,mouseY)<=(ballSize/2)+abs(overhead)){
        makeBounceBottom(mouseY);
          if(overhead<0);{
            ballY+=overhead;
@@ -211,7 +210,7 @@ void watchRacket(){
    }
   }
 
-void wallAdder(){
+void wallAdd(){
     if(millis()-lastAddTime > wallInt){
       int randHeight = round(random(minGH, maxGH));
       int randY = round(random(0,height-randHeight));
@@ -223,14 +222,14 @@ void wallAdder(){
 
 void wallHandler(){
     for(int i =0; i< walls.size(); i++){
-      wallRemover(i);
-      wallMover(i);
-      wallDrawer(i);
+      wallRemove(i);
+      wallMove(i);
+      wallDraw(i);
       watchWallCollision(i);
     }
   }
 
-void wallDrawer(int index){
+void wallDraw(int index){
     int[] wall= walls.get(index);
       int gapWallX = wall[0];
       int gapWallY = wall[1];
@@ -243,12 +242,12 @@ void wallDrawer(int index){
     rect(gapWallX, gapWallY+ gapWallH, gapWallW,height -(gapWallY+ gapWallH));
   }
 
-void wallMover( int index){
+void wallMove( int index){
     int[] wall = walls.get(index);
     wall[0] -= wallSpeed;
   }
 
-void wallRemover(int index){
+void wallRemove(int index){
     int[] wall = walls.get(index);
     if(wall[0] +wall[2] <= 0){
     walls.remove(index);
@@ -290,28 +289,52 @@ void watchWallCollision(int index){
   }
   
 //citation:  https://www.openprocessing.org/sketch/120612
-//health bar to drain altered to on hit upon watch wall collision
+//health bar to drain altered to on hit upon collision with watchwallcollision
 void drawHealthBar(){ 
-  noStroke();
-  fill(250,240,230);
+    noStroke();
+    fill(250,240,230);
   //bar initial
-  rectMode(CORNER);
-  rect(ballX-(healthBarW/2), ballY-30,healthBarW, 5);
-  if (health>60){
-    fill(50,200,110);
-  }else if (health > 30){
-    fill(230,120,30);
-  }else {
-    fill(231,75,60);
+    rectMode(CORNER);
+    rect(ballX-(healthBarW/2), ballY-30,healthBarW, 5);
+    if (health>60){
+      fill(50,200,110);
+    }else if (health > 30){
+      fill(230,120,30);
+    }else {
+      fill(231,75,60);
     }
     //secondary bar dynamic
-   rectMode(CORNER);
-   rect(ballX-(healthBarW/2), ballY-30, healthBarW*(health/maxHealth),5);
+     rectMode(CORNER);
+     rect(ballX-(healthBarW/2), ballY-30, healthBarW*(health/maxHealth),5);
   }
+  
 void decreaseHealth(){
     health -= healthDecrease;
     if(health <=0){
      gameOver();
    }
   }
+/*class sprite {
+  float x;
+  float y;
+  float dx;
+  float dy;
+  
+  void update(){
+    x +=dx;
+    y +=dy;
+    }
+  }
+class Particle extends sprite{
+  float diam;
+  color fillcolor;
+  
+  void render(){
+    pushMatrix();
+      noStroke();
+      fill(fillcolor);
+      ellipse(ballX,ballY,5,5);
+    popMatrix();
+  }
+}*/
 //
