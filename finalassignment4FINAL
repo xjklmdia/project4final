@@ -65,7 +65,8 @@ void initScreen(){
     background(0);
     textAlign(CENTER);
     textFont(Font1,32);
-    text("click to start", width/2, height/2);
+    text("welcome to Kayne ball",250,100);
+    text("have kanye do his kanye best", width/2, height/2);
     text("*you're probably going to lose",width/2,height-50);
   }
 
